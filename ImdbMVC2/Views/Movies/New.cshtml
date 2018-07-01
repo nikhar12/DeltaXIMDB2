@@ -1,0 +1,204 @@
+﻿@model ImdbMVC2.ViewModel.MovieProducerActor
+@{
+    ViewBag.Title = "New";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Add/Update</h2>
+
+@using (@Html.BeginForm("Create", "Movies", FormMethod.Post,new { enctype = "multipart/form-data" }))
+{
+    <div class="form-group">
+        @Html.LabelFor(m => m.Movies.name)
+        @Html.TextBoxFor(m => m.Movies.name,new {@class="form-control" })
+        @Html.ValidationMessageFor(m=>m.Movies.name)
+    </div>
+    <div class="form-group">
+        @Html.LabelFor(m => m.Movies.plot)
+        @Html.TextAreaFor(m => m.Movies.plot, new { @class = "form-control" })
+       
+    </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.Movies.yor)
+            @Html.TextBoxFor(m => m.Movies.yor, new { @class = "form-control" })
+            @Html.ValidationMessageFor(m => m.Movies.yor)
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.lActors)
+            @Html.ListBoxFor(m => m.selectedActorID, new MultiSelectList(Model.lActors, "id", "name"), "")
+          
+            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#actorModal">
+               Add Actor
+            </button>
+
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m => m.lProducer)
+            @Html.DropDownListFor(m => m.Movies.producer.id, new SelectList(Model.lProducer, "id", "pname"), "", new { @class = "form-control" })
+           
+            <button type="button" class="btn btn-link" data-toggle="modal" data-target="#producerModal">
+                Add Producer
+            </button>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(m=>m.Movies.poster)
+            @Html.TextBoxFor(m=>m.Movies.poster, new {Name="file", type = "file" })
+            @Html.ValidationMessageFor(m => m.Movies.poster)
+        </div>
+        @Html.HiddenFor(m => m.Movies.id);
+
+                <input type="submit" value="Save" class="btn btn-primary"/>
+
+                }
+
+
+<div id="addActorDiv">
+    <!-- Modal -->
+    <div class="modal fade" id="actorModal" tabindex="-1" role="dialog" aria-labelledby="actorModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add New Actor</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Name: <input type="text" id="txtName" /><br />
+                    Date of Birth:<input type="date" id="txtDOB"/><br />
+                    sex: <select id="selSex">
+                    <option value="female">female</option>
+                    <option value="male">male</option></select>
+                    <br />
+                    bio: <textarea id="txaBio"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="addActor">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div id="addProducerDiv">
+    <!-- Modal -->
+    <div class="modal fade" id="producerModal" tabindex="-1" role="dialog" aria-labelledby="producerModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add New Producer</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    Name: <input type="text" id="txtPName" /><br />
+                    Date of Birth:<input type="date" id="txtPDOB" /><br />
+                    sex: <select id="selPSex">
+                        
+                        <option value="female">female</option>
+                        <option value="male">male</option>
+                    </select>
+                    <br />
+                    bio: <textarea id="txaPBio"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="addProducer">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+  
+
+@section jquerycode
+{
+
+<script>
+
+        $(function () {
+
+            $("#addActor").click(function () {
+
+                var actor = {};
+                
+                actor.name = $("#txtName").val();
+                actor.dob = $("#txtDOB").val();
+                actor.sex = $("#selSex").val();
+                actor.bio = $("#txaBio").val();
+
+
+                if (actor.name == "" || actor.dob == "" || actor.sex == "" || actor.bio == "")
+                {
+                    return false;
+                }
+
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("createActorAsync","Actor")',
+                    data: '{actor: ' + JSON.stringify(actor) + '}',
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (value) {
+                        // alert("Actor has been added successfully.");
+                        
+                        console.log(value);
+                        $("#selectedActorID").append('<option value="'+value.Message+'">'+actor.name+'</option>')
+                        $('#actorModal').modal('toggle');
+                    },
+                    error: function () {
+                        alert("Error while adding actor");
+                    }
+                });
+
+
+            });
+
+
+            $("#addProducer").click(function () {
+
+                var producer = {};
+
+                producer.pname = $("#txtPName").val();
+                producer.dob = $("#txtPDOB").val();
+                producer.sex = $("#selPSex").val();
+                producer.bio = $("#txaPBio").val();
+                
+                if (producer.name == "" || producer.dob == "" || producer.sex == "" || producer.bio == "") {
+                    return false;
+                }
+
+                $.ajax({
+                    type: "POST",
+                    url: '@Url.Action("createProducerAsync","Producer")',
+                    data: '{producer: ' + JSON.stringify(producer) + '}',
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (value) {
+                        // alert("Actor has been added successfully.");
+                       
+                        console.log(value);
+                        $("#Movies_producer_id").append('<option value="' + value.Message + '">' + producer.pname + '</option>')
+                        $('#producerModal').modal('toggle');
+                    },
+                    error: function () {
+                        alert("Error while adding prodcuer");
+                    }
+                });
+
+
+            });
+
+
+     
+        });
+
+
+</script>
+}

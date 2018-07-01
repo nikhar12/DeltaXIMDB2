@@ -1,0 +1,35 @@
+﻿@model List<ImdbMVC2.Models.Movies>
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>Movie Listing</h2>
+
+<table class="table table-bordered">
+
+    <thead>
+        <tr><th>Poster</th><th>Movie Name</th><th>Producer Name</th><th>Actors in this movie</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model)
+{
+    <tr>
+        <td><img style="width:50px" src="@item.imgurl" /> </td>
+        <td>@item.name</td>
+        <td>@item.producer.pname</td>
+        <td>@foreach (var actor in item.Actors)
+        {
+            @actor.name<span>,</span>
+
+            
+        }
+        </td>
+        <td>@Html.ActionLink("Edit","Edit", new { id = item.id })</td>
+    </tr>
+
+}
+    </tbody>
+</table>
+
+@Html.ActionLink("Add New", "New", "Movies")
